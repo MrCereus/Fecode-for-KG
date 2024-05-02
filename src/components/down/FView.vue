@@ -5,7 +5,6 @@
 
 <script>
 import G6 from "@antv/g6";
-import { watch } from "vue";
 
 export default {
   name: "FView",
@@ -16,76 +15,130 @@ export default {
       nodes: [],
       edges: [],
     },
+    centerNodePairIds: Array,
+    alignNodePairListIds: Array,
+    type: String,
+    followNodes: Object,
   },
   data() {
     return {
       graph: null,
     };
   },
-  mounted() {
-    watch(
-      () => this.FGData,
-      () => {
-        this.setupG6();
-      },
-      { deep: true }
-    );
+  computed: {
+    followAndGData() {
+      return {
+        graph: this.FGData,
+        follow: this.followNodes,
+      };
+    },
   },
-  methods: {
-    setupG6() {
-      if (this.graph) {
-        this.graph.clear();
-      }
-
-      this.graph = new G6.Graph({
-        container: this.assignId,
-        fitView: true,
-        minZoom: 0.001,
-        fitViewPadding: [10, 10, 10, 10],
-        defaultNode: {
-          size: 25,
-          style: {
-            fill: "#E0E0E0",
-          },
-          labelCfg: {
-            style: {
-              fontSize: 8,
-            },
-          },
-        },
-        defaultEdge: {
-          style: {
-            endArrow: true,
-          },
-        },
-        layout: {
-          type: "forceAtlas2",
-          preventOverlap: true,
-        },
-        modes: {
-          default: [
-            "zoom-canvas",
-            "drag-node",
-            "drag-canvas",
-            // {
-            //   type: "tooltip",
-            //   formaText(model) {
-            //     const text =
-            //       "label: " + model.label + "<br/> class: " + model.class;
-            //     return text;
-            //   },
-            //   offset: 10,
-            // },
-          ],
-        },
-        animate: true,
-      });
-
-      // console.log(JSON.stringify (this.data));
+  watch: {
+    FGData(data) {
+      if (!data || !this.graph) return;
+      if (this.type === "follow") return;
       this.graph.data(JSON.parse(JSON.stringify(this.FGData))); // 此处会修改data，因此必须使用深拷贝
       this.graph.render();
     },
+    followAndGData(data) {
+      if (this.type === "base") return;
+      const { graph, follow } = data;
+      if (!graph || !follow) return;
+      this.graph.data(JSON.parse(JSON.stringify(graph))); // 此处会修改data，因此必须使用深拷贝
+      this.graph.render();
+    },
   },
+  mounted() {
+    if (this.graph) {
+      this.graph.clear();
+    }
+
+    this.graph = new G6.Graph({
+      container: this.assignId,
+      fitView: false,
+      //oom: 0.001,
+      fitViewPadding: [10, 10, 10, 10],
+      defaultNode: {
+        size: 25,
+        style: {
+          fill: "#E0E0E0",
+        },
+        labelCfg: {
+          style: {
+            fontSize: 8,
+          },
+        },
+      },
+      defaultEdge: {
+        style: {
+          endArrow: true,
+        },
+      },
+      layout: {
+        type: "gForce",
+        preventOverlap: true,
+        onTick: () => {
+          const nodes = this.graph.getNodes().map((item) => item.getModel());
+          nodes.forEach((item) => {
+            if (this.type === "base" && item.id === this.centerNodePairIds[0]) {
+              item.fx = this.graph.getWidth() / 2;
+              item.fy = this.graph.getHeight() / 2;
+            }
+            if (this.type === "follow" && this.followNodes[item.id]) {
+              item.fx = this.followNodes[item.id].x;
+              item.fy = this.followNodes[item.id].y;
+            }
+          });
+        },
+        onLayoutEnd: () => {
+          if (this.type === "follow") {
+            // TODO: follow图缩放设置
+            return;
+          }
+          const nodes = this.graph.getNodes().map((item) => item.getModel());
+          const followNodes = {};
+          nodes.forEach((item) => {
+            if (item.id === this.centerNodePairIds[0]) {
+              followNodes[this.centerNodePairIds[1]] = {
+                x: item.x,
+                y: item.y,
+              };
+              return;
+            }
+            const alignNode = this.alignNodePairListIds.find(
+              (ele) => ele[0] === item.id
+            );
+            if (alignNode) {
+              followNodes[alignNode[1]] = {
+                x: item.x,
+                y: item.y,
+              };
+            }
+          });
+          this.$emit("startFollow", followNodes);
+          // base 图 缩放设置
+        },
+      },
+      modes: {
+        default: [
+          "zoom-canvas",
+          "drag-node",
+          "drag-canvas",
+          // {
+          //   type: "tooltip",
+          //   formaText(model) {
+          //     const text =
+          //       "label: " + model.label + "<br/> class: " + model.class;
+          //     return text;
+          //   },
+          //   offset: 10,
+          // },
+        ],
+      },
+      animate: true,
+    });
+  },
+  methods: {},
 };
 </script>
 

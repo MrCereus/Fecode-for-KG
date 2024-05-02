@@ -22,15 +22,24 @@
         <a-flex class="block" :style="{ flex: 1 }">
           <FView
             class="block"
-            :style="{ flex: 1 }"
+            :style="{ width: '50%' }"
             assignId="LFView"
             :FGData="FGDataL"
+            type="base"
+            :centerNodePairIds="['24782', '35297']"
+            :alignNodePairListIds="[
+              ['1376', '11876'],
+              ['25150', '33940'],
+            ]"
+            @startFollow="startFollow"
           />
           <FView
             class="block"
-            :style="{ flex: 1 }"
+            :style="{ width: '50%' }"
             assignId="RFView"
+            type="follow"
             :FGData="FGDataR"
+            :followNodes="followNodes"
           />
         </a-flex>
       </a-flex>
@@ -50,13 +59,16 @@ import { ref, onMounted } from "vue";
 export default {
   setup() {
     // 读取Json数据
+    const followNodes = ref({});
     const tlbData = ref([]);
     const WCDatas = ref([]);
     const FGDataL = ref({});
     const FGDataR = ref({});
     const ENDatas = ref([]);
     const RLDatas = ref([]);
-
+    function startFollow(data) {
+      followNodes.value = data;
+    }
     onMounted(async () => {
       // 读取表格数据
       tlbData.value = await getTlbData();
@@ -90,7 +102,16 @@ export default {
       RLDatas.value = RLList;
     });
 
-    return { tlbData, WCDatas, FGDataL, FGDataR, ENDatas, RLDatas };
+    return {
+      tlbData,
+      WCDatas,
+      FGDataL,
+      FGDataR,
+      ENDatas,
+      RLDatas,
+      startFollow,
+      followNodes,
+    };
   },
   components: {
     detailView,
