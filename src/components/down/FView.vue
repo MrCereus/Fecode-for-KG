@@ -59,7 +59,7 @@ export default {
       //oom: 0.001,
       fitViewPadding: [10, 10, 10, 10],
       defaultNode: {
-        size: 25,
+        size: 12,
         style: {
           fill: "#E0E0E0",
         },
@@ -75,8 +75,10 @@ export default {
         },
       },
       layout: {
-        type: "gForce",
+        type: "force2",
         preventOverlap: true,
+        nodeStrength: 50,
+        linkDistance:100,
         onTick: () => {
           const nodes = this.graph.getNodes().map((item) => item.getModel());
           nodes.forEach((item) => {

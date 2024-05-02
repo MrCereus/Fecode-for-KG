@@ -26,10 +26,14 @@
             assignId="LFView"
             :FGData="FGDataL"
             type="base"
-            :centerNodePairIds="['24782', '35297']"
+            :centerNodePairIds="['6661', '17161']"
             :alignNodePairListIds="[
-              ['1376', '11876'],
-              ['25150', '33940'],
+              ['306', '10806'],
+              ['773', '11273'],
+              ['1634', '12134'],
+              ['4411', '14911'],
+              ['5819', '16319'],
+              ['24113', '35194'],
             ]"
             @startFollow="startFollow"
           />
@@ -75,19 +79,19 @@ export default {
 
       // 读取词云数据
       const WCList = [];
-      for (let i = 6; i <= 10; ++i) {
+      for (let i = 1; i <= 5; ++i) {
         const res = await getWCData("WordCloud" + i + ".json");
         WCList.push(res);
       }
       WCDatas.value = WCList;
 
       // 读取力导向图数据
-      FGDataL.value = await getFGData("ForceGraph3.json");
-      FGDataR.value = await getFGData("ForceGraph4.json");
+      FGDataL.value = await getFGData("ForceGraph1.json");
+      FGDataR.value = await getFGData("ForceGraph2.json");
 
       // 读取节点列表数据
       const ENList = [];
-      for (let i = 6; i <= 10; ++i) {
+      for (let i = 1; i <= 5; ++i) {
         const res = await getLiData("./EL/EntityList" + i + ".json");
         ENList.push(res);
       }
@@ -95,7 +99,7 @@ export default {
 
       // 读取边列表数据
       const RLList = [];
-      for (let i = 6; i <= 10; ++i) {
+      for (let i = 1; i <= 5; ++i) {
         const res = await getLiData("./RL/RelList" + i + ".json");
         RLList.push(res);
       }
