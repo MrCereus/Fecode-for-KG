@@ -116,7 +116,7 @@ export default {
             }
           });
           this.$emit("startFollow", followNodes);
-          // base 图 缩放设置
+          // TODO: base 图 缩放设置
         },
       },
       modes: {
